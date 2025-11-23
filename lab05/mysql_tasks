@@ -1,0 +1,157 @@
+MySQL [(none)]> USE project_db;
+Database changed
+MySQL [project_db]> CREATE TABLE categories (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     name VARCHAR(100) NOT NULL
+    -> );
+ todos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    category_id INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_category
+        FOREIGN KEY (category_id)
+        REFERENCES categories(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+Query OK, 0 rows affected (0.068 sec)
+
+MySQL [project_db]>
+MySQL [project_db]> CREATE TABLE todos (
+    ->     id INT AUTO_INCREMENT PRIMARY KEY,
+    ->     title VARCHAR(200) NOT NULL,
+    ->     category_id INT NOT NULL,
+    ->     status VARCHAR(50) NOT NULL,
+    ->     CONSTRAINT fk_category
+    ->         FOREIGN KEY (category_id)
+    ->         REFERENCES categories(id)
+    ->         ON DELETE CASCADE
+    ->         ON UPDATE CASCADE
+    -> );
+Query OK, 0 rows affected (0.049 sec)
+
+MySQL [project_db]> INSERT INTO categories (name)
+    -> VALUES
+    ->     ('Home'),
+    ->     ('Work'),
+    ->     ('Hobby');
+Query OK, 3 rows affected (0.013 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MySQL [project_db]> INSERT INTO todos (title, category_id, status)
+    -> VALUES
+    ->     ('Wash dishes', 1, 'pending'),
+    ->     ('Clean house', 1, 'done'),
+    ->     ('Prepare report', 2, 'pending'),
+    ->     ('Fix production bug', 2, 'in progress'),
+    ->     ('Paint a picture', 3, 'pending'),
+    ->     ('Practice guitar', 3, 'done');
+Query OK, 6 rows affected (0.006 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+MySQL [project_db]> SELECT * FROM categories;
++----+-------+
+| id | name  |
++----+-------+
+|  1 | Home  |
+|  2 | Work  |
+|  3 | Hobby |
++----+-------+
+3 rows in set (0.002 sec)
+
+MySQL [project_db]> SELECT * FROM todos;
++----+--------------------+-------------+-------------+
+| id | title              | category_id | status      |
++----+--------------------+-------------+-------------+
+|  1 | Wash dishes        |           1 | pending     |
+|  2 | Clean house        |           1 | done        |
+|  3 | Prepare report     |           2 | pending     |
+|  4 | Fix production bug |           2 | in progress |
+|  5 | Paint a picture    |           3 | pending     |
+|  6 | Practice guitar    |           3 | done        |
++----+--------------------+-------------+-------------+
+6 rows in set (0.001 sec)
+
+MySQL [project_db]> SELECT
+    ->     t.id,
+    ->     t.title,
+    ->     t.status,
+    ->     c.name AS category
+    -> FROM todos t
+    -> JOIN categories c ON t.category_id = c.id;
++----+--------------------+-------------+----------+
+| id | title              | status      | category |
++----+--------------------+-------------+----------+
+|  1 | Wash dishes        | pending     | Home     |
+|  2 | Clean house        | done        | Home     |
+|  3 | Prepare report     | pending     | Work     |
+|  4 | Fix production bug | in progress | Work     |
+|  5 | Paint a picture    | pending     | Hobby    |
+|  6 | Practice guitar    | done        | Hobby    |
++----+--------------------+-------------+----------+
+6 rows in set (0.001 sec)
+
+MySQL [project_db]> SELECT
+    ->     t.id,
+    ->     t.title,
+    ->     t.status
+    -> FROM todos t
+    -> JOIN categories c ON t.category_id = c.id
+    -> WHERE c.name = 'Work';
++----+--------------------+-------------+
+| id | title              | status      |
++----+--------------------+-------------+
+|  3 | Prepare report     | pending     |
+|  4 | Fix production bug | in progress |
++----+--------------------+-------------+
+2 rows in set (0.001 sec)
+
+MySQL [project_db]> SELECT
+    ->     c.name AS category,
+    ->     COUNT(t.id) AS tasks_count
+    -> FROM categories c
+    -> LEFT JOIN todos t ON c.id = t.category_id
+    -> GROUP BY c.id, c.name;
++----------+-------------+
+| category | tasks_count |
++----------+-------------+
+| Home     |           2 |
+| Work     |           2 |
+| Hobby    |           2 |
++----------+-------------+
+3 rows in set (0.003 sec)
+
+MySQL [(none)]> USE project_db;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+MySQL [project_db]>
+MySQL [project_db]> SELECT * FROM categories;
++----+-------+
+| id | name  |
++----+-------+
+|  1 | Home  |
+|  2 | Work  |
+|  3 | Hobby |
++----+-------+
+3 rows in set (0.004 sec)
+
+MySQL [project_db]> SELECT * FROM todos;
++----+--------------------+-------------+-------------+
+| id | title              | category_id | status      |
++----+--------------------+-------------+-------------+
+|  1 | Wash dishes        |           1 | pending     |
+|  2 | Clean house        |           1 | done        |
+|  3 | Prepare report     |           2 | pending     |
+|  4 | Fix production bug |           2 | in progress |
+|  5 | Paint a picture    |           3 | pending     |
+|  6 | Practice guitar    |           3 | done        |
++----+--------------------+-------------+-------------+
+6 rows in set (0.003 sec)
+
+MySQL [project_db]> INSERT INTO categories (name) VALUES ('TestOnReplica');
+ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
+MySQL [project_db]> UPDATE categories SET name = 'NewName' WHERE id = 1;
+ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
